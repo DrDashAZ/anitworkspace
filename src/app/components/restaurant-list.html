@@ -1,0 +1,37 @@
+<div class="list-container">
+    <div class="add-form">
+        <input #nameInput type="text" placeholder="Add a lunch spot..."
+            (keyup.enter)="addRestaurant(nameInput.value); nameInput.value=''">
+        <button (click)="addRestaurant(nameInput.value); nameInput.value=''">Add</button>
+    </div>
+
+    <div *ngIf="loading()" class="loading">Loading lunch spots...</div>
+
+    <div *ngIf="error()" class="error">
+        Error: {{ error() }}
+    </div>
+
+    <ul *ngIf="!loading() && !error()" class="restaurant-list">
+        <li *ngFor="let restaurant of restaurants()" class="restaurant-item" [class.used]="restaurant.last_selected_at">
+            <span class="name">{{ restaurant.name }}</span>
+
+            <div class="actions">
+                <span *ngIf="restaurant.last_selected_at" class="badge">Used</span>
+
+                <div class="admin-actions" *ngIf="adminService.isAuthenticated()">
+                    <button *ngIf="restaurant.last_selected_at" (click)="resetCooldown(restaurant.id)" class="icon-btn"
+                        title="Reset Cooldown">
+                        🔄
+                    </button>
+                    <button (click)="deleteRestaurant(restaurant.id)" class="icon-btn delete" title="Remove">
+                        🗑️
+                    </button>
+                </div>
+            </div>
+        </li>
+
+        <li *ngIf="restaurants().length === 0" class="empty-state">
+            No restaurants yet. Add one!
+        </li>
+    </ul>
+</div>

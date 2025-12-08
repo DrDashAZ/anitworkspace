@@ -1,0 +1,61 @@
+/* Global Styles */
+:root {
+  --font-body: 'Alegreya', serif;
+  --font-heading: 'Belleza', sans-serif;
+  
+  /* Color Palette - mimicking ctlunch.netlify.app */
+  --bg-color: #fdfbf7; /* Off-white/cream paper feel */
+  --text-color: #2c2c2c;
+  --accent-color: #d35400; /* Burnt orange/rust */
+  --secondary-color: #34495e;
+  --border-color: #e0e0e0;
+  --card-bg: #ffffff;
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  margin-top: 0;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+/* Utilities */
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+button {
+  cursor: pointer;
+  font-family: var(--font-heading);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
