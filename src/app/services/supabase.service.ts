@@ -8,6 +8,7 @@ export interface Restaurant {
     created_at: string;
     last_selected_at: string | null;
     is_active: boolean;
+    note?: string;
 }
 
 @Injectable({
@@ -67,6 +68,15 @@ export class SupabaseService {
         const { error } = await this.supabase
             .from('restaurants')
             .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+    }
+
+    async updateRestaurant(id: string, updates: Partial<Restaurant>) {
+        const { error } = await this.supabase
+            .from('restaurants')
+            .update(updates)
             .eq('id', id);
 
         if (error) throw error;

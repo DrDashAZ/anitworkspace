@@ -13,19 +13,42 @@
 
     <ul *ngIf="!loading() && !error()" class="restaurant-list">
         <li *ngFor="let restaurant of restaurants()" class="restaurant-item" [class.used]="restaurant.last_selected_at">
-            <span class="name">{{ restaurant.name }}</span>
+            <div class="restaurant-item-header">
+                <span class="name">{{ restaurant.name }}</span>
 
-            <div class="actions">
-                <span *ngIf="restaurant.last_selected_at" class="badge">Used</span>
+                <div class="actions">
+                    <span *ngIf="restaurant.last_selected_at" class="badge">Used</span>
 
-                <div class="admin-actions" *ngIf="adminService.isAuthenticated()">
-                    <button *ngIf="restaurant.last_selected_at" (click)="resetCooldown(restaurant.id)" class="icon-btn"
-                        title="Reset Cooldown">
-                        🔄
+                    <button (click)="toggleNote(restaurant.id)" class="icon-btn" title="Notes">
+                        📝
                     </button>
-                    <button (click)="deleteRestaurant(restaurant.id)" class="icon-btn delete" title="Remove">
-                        🗑️
-                    </button>
+
+                    <div class="admin-actions" *ngIf="adminService.isAuthenticated()">
+                        <button *ngIf="restaurant.last_selected_at" (click)="resetCooldown(restaurant.id)"
+                            class="icon-btn" title="Reset Cooldown">
+                            🔄
+                        </button>
+                        <button (click)="deleteRestaurant(restaurant.id)" class="icon-btn delete" title="Remove">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Note Section -->
+            <div *ngIf="visibleNoteId() === restaurant.id" class="note-section">
+                <!-- Edit Mode (Admin Only) -->
+                <div *ngIf="adminService.isAuthenticated()">
+                    <textarea #noteInput class="note-input" placeholder="Add a note..."
+                        [value]="restaurant.note || ''"></textarea>
+                    <button class="save-btn" (click)="saveNote(restaurant.id, noteInput.value)">Save Note</button>
+                </div>
+
+                <!-- View Mode (Public or Admin view of content effectively handled by edit mode usually, but spec says visitors read only) -->
+                <!-- Actually, if admin is authenticated, they see edit mode. If not, they see read only. -->
+                <div *ngIf="!adminService.isAuthenticated()" class="note-read-only">
+                    <div *ngIf="restaurant.note" class="note-display">{{ restaurant.note }}</div>
+                    <div *ngIf="!restaurant.note" class="note-empty">No notes available.</div>
                 </div>
             </div>
         </li>
@@ -34,4 +57,8 @@
             No restaurants yet. Add one!
         </li>
     </ul>
+
+    <div class="footer-note">
+        <p><em>Note 📝: Restaurant notes can only be added or edited by the admin.</em></p>
+    </div>
 </div>

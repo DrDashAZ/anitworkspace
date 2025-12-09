@@ -4,7 +4,8 @@ create table public.restaurants (
   created_at timestamptz default now(),
   name text not null,
   last_selected_at timestamptz,
-  is_active boolean default true
+  is_active boolean default true,
+  note text
 );
 
 -- Enable Row Level Security (RLS)
