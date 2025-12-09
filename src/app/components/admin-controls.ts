@@ -26,6 +26,10 @@ export class AdminControlsComponent {
     }
   }
 
+  logout() {
+    this.adminService.logout();
+  }
+
   async pickRandom() {
     if (!this.adminService.isAuthenticated()) return;
 

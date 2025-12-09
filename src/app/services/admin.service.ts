@@ -7,7 +7,7 @@ import { SupabaseService, Restaurant } from './supabase.service';
 export class AdminService {
     private supabaseService = inject(SupabaseService);
 
-    private _isAuthenticated = signal<boolean>(false);
+    private _isAuthenticated = signal<boolean>(!!sessionStorage.getItem('admin_authenticated'));
     isAuthenticated = computed(() => this._isAuthenticated());
 
     // Default cooldown settings (local cache, ideally fetched from DB settings table)
@@ -15,6 +15,7 @@ export class AdminService {
 
     checkPassword(password: string): boolean {
         if (password === 'lizrulz') {
+            sessionStorage.setItem('admin_authenticated', 'true');
             this._isAuthenticated.set(true);
             return true;
         }
@@ -22,6 +23,7 @@ export class AdminService {
     }
 
     logout() {
+        sessionStorage.removeItem('admin_authenticated');
         this._isAuthenticated.set(false);
     }
 

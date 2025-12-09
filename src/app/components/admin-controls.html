@@ -12,6 +12,10 @@
                 (ngModelChange)="adminService.cooldownDays.set($event)" min="1" max="30"
                 [disabled]="!adminService.isAuthenticated()">
         </div>
+
+        <button class="action-btn secondary" (click)="logout()" *ngIf="adminService.isAuthenticated()">
+            🔒 Lock
+        </button>
     </div>
 
     <div class="overlay" *ngIf="!adminService.isAuthenticated()">
