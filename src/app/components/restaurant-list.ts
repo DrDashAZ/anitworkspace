@@ -2,13 +2,14 @@ import { normalizeString, levenshteinDistance } from '../utils/string-utils';
 import { Component, inject, OnInit, signal } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
-import { SupabaseService, Restaurant } from '../services/supabase.service';
+import { FormsModule } from '@angular/forms';
+import { SupabaseService, Restaurant, Rating } from '../services/supabase.service';
 import { AdminService } from '../services/admin.service';
 
 @Component({
   selector: 'app-restaurant-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './restaurant-list.html',
   styleUrls: ['./restaurant-list.css']
 })
@@ -21,6 +22,13 @@ export class RestaurantListComponent implements OnInit {
   error = signal<string | null>(null);
 
   visibleNoteId = signal<string | null>(null);
+  visibleRateId = signal<string | null>(null);
+  ratingsMap = signal<Map<string, Rating[]>>(new Map());
+
+  // Form state
+  // We can use a map or simple temp state since only one form open at a time usually
+  ratingEmail = '';
+  ratingValue = 10;
 
   async ngOnInit() {
     await this.loadRestaurants();
@@ -31,6 +39,15 @@ export class RestaurantListComponent implements OnInit {
       this.loading.set(true);
       const data = await this.supabaseService.getRestaurants();
       this.restaurants.set(data);
+
+      // Load ratings for all restaurants
+      const rMap = new Map<string, Rating[]>();
+      await Promise.all(data.map(async (r) => {
+        const ratings = await this.supabaseService.getRatings(r.id);
+        rMap.set(r.id, ratings);
+      }));
+      this.ratingsMap.set(rMap);
+
     } catch (err: any) {
       this.error.set(err.message);
     } finally {
@@ -100,6 +117,7 @@ export class RestaurantListComponent implements OnInit {
       this.visibleNoteId.set(null);
     } else {
       this.visibleNoteId.set(id);
+      this.visibleRateId.set(null); // Close rate if open
     }
   }
 
@@ -116,5 +134,53 @@ export class RestaurantListComponent implements OnInit {
   getNote(id: string): string {
     const r = this.restaurants().find(x => x.id === id);
     return r?.note || '';
+  }
+
+  // Rating Logic
+  toggleRate(id: string) {
+    if (this.visibleRateId() === id) {
+      this.visibleRateId.set(null);
+    } else {
+      this.ratingEmail = '';
+      this.ratingValue = 10;
+      this.visibleRateId.set(id);
+      this.visibleNoteId.set(null); // Close note if open
+    }
+  }
+
+  getAverageRating(id: string): string {
+    const ratings = this.ratingsMap().get(id) || [];
+    if (ratings.length === 0) return 'New';
+
+    const sum = ratings.reduce((acc, curr) => acc + curr.rating, 0);
+    const avg = sum / ratings.length;
+    return avg.toFixed(1); // e.g., "8.5"
+  }
+
+  getStarDisplay(value: number): string {
+    // Return a string of stars
+    return '⭐'.repeat(Math.min(Math.max(value, 0), 10));
+  }
+
+  async submitRating(id: string) {
+    if (!this.ratingEmail.trim()) {
+      alert('Email is required.');
+      return;
+    }
+
+    // Basic validation, service handles strict check
+    if (!this.ratingEmail.endsWith('@soundthinking.com')) {
+      alert('Email must end with @soundthinking.com');
+      return;
+    }
+
+    try {
+      await this.supabaseService.addRating(id, this.ratingEmail, this.ratingValue);
+      alert('Rating submitted!');
+      this.visibleRateId.set(null);
+      await this.loadRestaurants(); // Reload to update average
+    } catch (err: any) {
+      alert(err.message);
+    }
   }
 }

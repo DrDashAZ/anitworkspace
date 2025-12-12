@@ -14,13 +14,25 @@
     <ul *ngIf="!loading() && !error()" class="restaurant-list">
         <li *ngFor="let restaurant of restaurants()" class="restaurant-item" [class.used]="restaurant.last_selected_at">
             <div class="restaurant-item-header">
-                <span class="name">{{ restaurant.name }}</span>
+                <span class="name">
+                    {{ restaurant.name }}
+                    <span class="avg-rating" title="Average Rating">
+                        ⭐ {{ getAverageRating(restaurant.id) }} <span class="rating-count"
+                            *ngIf="ratingsMap().get(restaurant.id)?.length">({{ ratingsMap().get(restaurant.id)?.length
+                            }})</span>
+                    </span>
+                </span>
 
                 <div class="actions">
                     <span *ngIf="restaurant.last_selected_at" class="badge">Used</span>
 
                     <button (click)="toggleNote(restaurant.id)" class="icon-btn" title="Notes">
                         📝
+                    </button>
+
+                    <button *ngIf="restaurant.last_selected_at" (click)="toggleRate(restaurant.id)" class="icon-btn"
+                        title="Rate">
+                        ⭐
                     </button>
 
                     <div class="admin-actions" *ngIf="adminService.isAuthenticated()">
@@ -49,6 +61,35 @@
                 <div *ngIf="!adminService.isAuthenticated()" class="note-read-only">
                     <div *ngIf="restaurant.note" class="note-display">{{ restaurant.note }}</div>
                     <div *ngIf="!restaurant.note" class="note-empty">No notes available.</div>
+                </div>
+            </div>
+
+            <!-- Rating Section -->
+            <div *ngIf="visibleRateId() === restaurant.id" class="rating-section">
+                <div class="rating-form">
+                    <h4>Rate this Spot</h4>
+                    <p class="helper-text">Enter your SoundThinking email to rate.</p>
+
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" [(ngModel)]="ratingEmail" class="rating-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Rating (1-10):</label>
+                        <div class="rating-control">
+                            <input type="number" min="1" max="10" [(ngModel)]="ratingValue" class="rating-number">
+                            <span class="stars-preview">{{ getStarDisplay(ratingValue) }}</span>
+                        </div>
+                    </div>
+
+                    <button class="submit-rating-btn" (click)="submitRating(restaurant.id)">Submit Rating</button>
+                    <button class="cancel-btn" (click)="toggleRate(restaurant.id)">Cancel</button>
+
+                    <p class="info-text">
+                        * You can only rate once per "Used" cycle.
+                        * Ratings are averaged across all users.
+                    </p>
                 </div>
             </div>
         </li>
