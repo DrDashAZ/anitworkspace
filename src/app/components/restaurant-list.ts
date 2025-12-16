@@ -112,6 +112,16 @@ export class RestaurantListComponent implements OnInit {
     }
   }
 
+  async selectRestaurant(id: string, name: string) {
+    if (!confirm(`Select "${name}" for lunch?\n\nThis will mark it as used and start the cooldown.`)) return;
+    try {
+      await this.supabaseService.markAsSelected(id);
+      await this.loadRestaurants();
+    } catch (err: any) {
+      this.error.set(err.message);
+    }
+  }
+
   toggleNote(id: string) {
     if (this.visibleNoteId() === id) {
       this.visibleNoteId.set(null);

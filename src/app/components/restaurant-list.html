@@ -36,6 +36,11 @@
                     </button>
 
                     <div class="admin-actions" *ngIf="adminService.isAuthenticated()">
+                        <button *ngIf="!restaurant.last_selected_at"
+                            (click)="selectRestaurant(restaurant.id, restaurant.name)" class="icon-btn"
+                            title="Select This Spot">
+                            ✅
+                        </button>
                         <button *ngIf="restaurant.last_selected_at" (click)="resetCooldown(restaurant.id)"
                             class="icon-btn" title="Reset Cooldown">
                             🔄
